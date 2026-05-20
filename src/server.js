@@ -29,6 +29,7 @@ import { dirname, join } from "node:path";
 import { statusRoute } from "./routes/status.js";
 import { activateRoute } from "./routes/activate.js";
 import { deactivateRoute } from "./routes/deactivate.js";
+import { authStart, authCallback } from "./routes/auth.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = join(__dirname, "..", "public");
@@ -72,6 +73,11 @@ app.get("/", async (c) => {
   // sensible defaults but we explicitly do NOT want X-Frame-Options DENY.
   return c.body(html);
 });
+
+// ---------- OAuth install (one-shot, used once per shop) ----------
+app.get("/auth", (c) => authStart(c, env));
+app.get("/auth/callback", (c) => authCallback(c, env));
+app.get("/api/auth", (c) => authStart(c, env)); // alias matching shopify.app.toml's redirect_urls
 
 // ---------- API ----------
 app.get("/api/status", (c) => statusRoute(c, env));
