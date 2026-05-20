@@ -1,0 +1,24 @@
+{
+  "name": "vitaviva-preorder-shipping-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Embedded Shopify admin UI for activating the preorder-shipping-combiner Function. Hono + Node, deploys to Railway.",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "node --watch --env-file=.env.local src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test ./test/*.test.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.18.0",
+    "hono": "^4.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
