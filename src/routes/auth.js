@@ -170,12 +170,26 @@ export async function authCallback(c, env) {
 }
 
 /**
- * Compute the public base URL of this server using the incoming Host header.
+ * Compute the public base URL of this server using the incoming Host header
+ * and X-Forwarded-Proto when present. Railway's edge terminates TLS, so
+ * `c.req.url` reports the INTERNAL http:// scheme — using that directly
+ * leaks an `http://...` redirect_uri to Shopify and OAuth rejects it as
+ * not-whitelisted. We trust X-Forwarded-Proto (set by Railway's edge),
+ * falling back to https when running behind a known cloud host.
  *
  * @param {import("hono").Context} c
  * @returns {string}
  */
 function selfBaseUrl(c) {
   const url = new URL(c.req.url);
-  return `${url.protocol}//${url.host}`;
+  const xfProto = c.req.header("x-forwarded-proto");
+  const host = c.req.header("x-forwarded-host") || url.host;
+  // Default to https unless we explicitly see http on the forwarded proto.
+  let proto = "https";
+  if (xfProto) {
+    proto = xfProto.split(",")[0].trim() || "https";
+  } else if (url.protocol === "http:" && /^(localhost|127\.0\.0\.1|0\.0\.0\.0)/.test(host)) {
+    proto = "http";
+  }
+  return `${proto}://${host}`;
 }
